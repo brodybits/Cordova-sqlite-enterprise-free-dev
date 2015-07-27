@@ -1239,13 +1239,13 @@ var mytests = function() {
               ok(!!error, "valid error object");
 
               // XXX ONLY WORKING for iOS version of plugin:
-              if (isWebSql || !(isAndroid || isWindows || isWP8))
-                ok(!!error['code'], "valid error.code exists");
+              //if (isWebSql || !(isAndroid || isWindows || isWP8))
+              //  ok(!!error['code'], "valid error.code exists");
 
               ok(error.hasOwnProperty('message'), "error.message exists");
               // XXX ONLY WORKING for iOS version of plugin:
-              if (isWebSql || !(isAndroid || isWindows || isWP8))
-                strictEqual(error.code, 5, "error.code === SQLException.SYNTAX_ERR (5)");
+              //if (isWebSql || !(isAndroid || isWindows || isWP8))
+              //  strictEqual(error.code, 5, "error.code === SQLException.SYNTAX_ERR (5)");
               //equal(error.message, "Request failed: insert into test_table (data) VALUES ,123", "error.message");
               start();
 
@@ -1285,8 +1285,8 @@ var mytests = function() {
               ok(!!error, "valid error object");
 
               // XXX ONLY WORKING for iOS version of plugin:
-              if (isWebSql || !(isAndroid || isWindows || isWP8))
-                ok(!!error['code'], "valid error.code exists");
+              //if (isWebSql || !(isAndroid || isWindows || isWP8))
+              //  ok(!!error['code'], "valid error.code exists");
 
               ok(error.hasOwnProperty('message'), "error.message exists");
               //strictEqual(error.code, 6, "error.code === SQLException.CONSTRAINT_ERR (6)");
