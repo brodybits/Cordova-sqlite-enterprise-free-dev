@@ -130,6 +130,62 @@ function onDeviceReady() {
 
 **NOTE:** The database file name should include the extension, if desired.
 
+## SQL transactions
+
+The following types of SQL transactions are supported by this version:
+- Single-statement transactions
+- Standard asynchronous transactions
+- Multi-part transactions
+
+### Single-statement transactions
+
+Sample:
+
+```Javascript
+db.executeSql("select length('tenletters') as stringlength", [], function (res) {
+  var stringlength = res.rows.item(0).stringlength;
+  console.log('got stringlength: ' + stringlength);
+});
+```
+
+### Multi-part transactions
+
+Sample:
+
+```Javascript
+var tx = db.beginTransaction();
+tx.executeSql("DROP TABLE IF EXISTS mytable");
+tx.executeSql("CREATE TABLE mytable (myfield)");
+
+tx.executeSql("INSERT INTO mytable values(?)", ['test value']);
+tx.executeSql("SELECT * from mytable", [], function(tx, res) {
+  console.log("Got value: " + res.rows.item(0).myfield);
+}, function(e) {
+  console.log("Ignore unexpected error callback with message: " + e.message);
+  return false;
+});
+
+tx.end(function() {
+  console.log('Optional success callback');
+}, function(e) {
+  console.log("Optional error callback with message: " + e.message);
+);
+```
+
+Sample with abort:
+
+```Javascript
+var tx = db.beginTransaction();
+tx.executeSql("INSERT INTO mytable values(?)", ['wrong data']);
+tx.abort(function() {
+  console.log('Optional callback');
+});
+```
+
+IMPORTANT NOTES:
+- In case a `tx.executeSql` call results in an error and it does not have an error callback or the error callback does NOT return `false`, the transaction will be aborted with a ROLLBACK upon the `tx.end` call.
+- When a multi-part transaction is started by the `db.beginTransaction` call, all other transactions are blocked until the multi-part transaction is either completed successfully or aborted (with a ROLLBACK).
+
 ## Background processing
 
 The threading model depends on which version is used:
