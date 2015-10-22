@@ -80,6 +80,58 @@ var mytests = function() {
           });
         }, MYTIMEOUT);
 
+        it(suiteName + "multi-part transaction interleaved", function(done) {
+          var db = openDatabase("multi-part-interleaved-test.db", "1.0", "Demo", DEFAULT_SIZE);
+
+          expect(db).toBeDefined()
+          db.executeSql("DROP TABLE IF EXISTS tt");
+          db.executeSql("CREATE TABLE tt (tf)");
+
+          var tx1 = db.beginTransaction();
+
+          expect(tx1).toBeDefined()
+
+          tx1.executeSql("INSERT INTO tt values(?)", ['tv']);
+
+          var tx2 = db.beginTransaction();
+
+          tx1.executeSql("DROP TABLE IF EXISTS tt");
+          tx1.executeSql("CREATE TABLE tt (tf)");
+          tx1.executeSql("INSERT INTO tt values(?)", ['tv2']);
+
+          tx2.executeSql("SELECT * from tt", [], function(tx, res) {
+            expect(res.rows.item(0).tf).toEqual('tv2');
+
+            // just in case:
+            try {
+              tx1.end();
+            } catch(e) {
+              // expected here
+              expect(true).toBe(true);
+            }
+
+            tx2.end();
+            done();
+          }, function(err) {
+            // not expected:
+            expect(false).toBe(true);
+
+            // just in case:
+            try {
+              tx.end();
+            } catch(e) {
+              // expected here
+              expect(true).toBe(true);
+            }
+
+            tx2.end();
+            done();
+          });
+
+          tx1.end();
+
+        }, MYTIMEOUT);
+
     });
   };
 }

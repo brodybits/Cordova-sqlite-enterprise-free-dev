@@ -152,14 +152,12 @@
       if !@openDBs[@dbname]
         throw newSQLError 'database not open'
 
-      myfn = (tx) ->
-        tx.canPause = true
-        # XXX TBD check if "do-nothing" statement is really necessary here?
-        tx.addStatement 'SELECT 1', [], null, (tx, err) ->
-          throw newSQLError 'Unable to access database: ' + err.message, err.code
-        return
-
-      mytx = new SQLitePluginTransaction(this, myfn, error, null, true, false)
+      myfn = (tx) -> return
+      mytx = new SQLitePluginTransaction(this, myfn, error, null, false, false)
+      mytx.canPause = true
+      mytx.addStatement "BEGIN", [], null, (tx, err) ->
+        throw newSQLError "unable to begin transaction: " + err.message, err.code
+      mytx.txlock = true
       @addTransaction mytx
 
       mytx
@@ -392,9 +390,6 @@
       @error = error
       if @isPaused
         @isPaused = false
-        # XXX TBD check if "do-nothing" statement is really necessary here?
-        @addStatement 'SELECT 1', [], null, (tx, err) ->
-          throw newSQLError 'Unable to SELECT: ' + err.message, err.code
         @run()
 
     SQLitePluginTransaction::abort = (errorcb) ->

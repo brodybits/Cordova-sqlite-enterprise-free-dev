@@ -129,13 +129,13 @@ Contact for commercial license: info@litehelpers.net
     if (!this.openDBs[this.dbname]) {
       throw newSQLError('database not open');
     }
-    myfn = function(tx) {
-      tx.canPause = true;
-      tx.addStatement('SELECT 1', [], null, function(tx, err) {
-        throw newSQLError('Unable to access database: ' + err.message, err.code);
-      });
-    };
-    mytx = new SQLitePluginTransaction(this, myfn, error, null, true, false);
+    myfn = function(tx) {};
+    mytx = new SQLitePluginTransaction(this, myfn, error, null, false, false);
+    mytx.canPause = true;
+    mytx.addStatement("BEGIN", [], null, function(tx, err) {
+      throw newSQLError("unable to begin transaction: " + err.message, err.code);
+    });
+    mytx.txlock = true;
     this.addTransaction(mytx);
     return mytx;
   };
@@ -362,9 +362,6 @@ Contact for commercial license: info@litehelpers.net
     this.error = error;
     if (this.isPaused) {
       this.isPaused = false;
-      this.addStatement('SELECT 1', [], null, function(tx, err) {
-        throw newSQLError('Unable to SELECT: ' + err.message, err.code);
-      });
       return this.run();
     }
   };
